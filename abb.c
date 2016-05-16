@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include "ABB.h"
 #include <stdlib.h>
 #include <stddef.h>
@@ -53,6 +54,7 @@ bool abb_asignar(abb_t* arbol, nodo_t* nodo, const char* clave, void* dato){
             if(!nodo_auxiliar->clave)return false;
             nodo_auxiliar->dato = dato;
             nodo->derecho= nodo_auxiliar;
+            arbol->cantidad++;
             return true;
         }
         else{
@@ -64,6 +66,7 @@ bool abb_asignar(abb_t* arbol, nodo_t* nodo, const char* clave, void* dato){
             nodo_auxiliar->clave = strdup(clave);
             nodo_auxiliar->dato = dato;
             nodo->izquierdo = nodo_auxiliar;
+            arbol->cantidad++;
             return true;
         }
         else{
@@ -76,7 +79,7 @@ bool abb_auxiliar_pertenece(const abb_t* arbol,nodo_t* nodo,const char* clave){
     if (nodo == NULL){
         return false;
     }
-        if(arbol->funcion_de_comparacion(clave,nodo->clave)==0){
+    if(arbol->funcion_de_comparacion(clave,nodo->clave)==0){
         return true;
     }
     bool respuesta_1 = abb_auxiliar_pertenece(arbol,nodo->izquierdo,clave);
@@ -170,16 +173,104 @@ size_t abb_cantidad(abb_t *arbol){
     return arbol->cantidad;
 }
 
-
-void abb_visitar(nodo_t* nodo,bool visitar(const char*, void*,void*), void *extra){
-        if(!nodo){
-                return;
+void *abb_borrar(abb_t *arbol, const char *clave){
+    
+    if(!arbol->raiz)return NULL;
+    else if (!abb_pertenece(arbol,clave))return NULL;
+    else if(!arbol->raiz->nodo_derecho && !arbol->raiz->nodo_izquierdo){
+        void* dato = arbol->raiz->dato;
+        free(arbol->raiz->clave);
+        free(arbol->raiz)
+    }
+    else{
+        void* dato = abb_borrar_auxiliar(arbol,arbol->raiz,clave, NULL);
+    }
+    arbol->cantidad--;
+    return dato;
+}
+           
+void* abb_borrar_auxiliar(abb_t *arbol,nodo_t* nodo,const char* clave, nodo_t* padre){
+        if (arbol->funcion_de_comparacion(clave,nodo->clave) == 0){
+            dato = nodo->dato;
+            verificar_borrar(arbol,nodo,padre);
+            return dato;
         }
-        abb_visitar(nodo->izquierdo,visitar,extra);
-        visitar(nodo->clave,nodo->dato,extra);
-        abb_visitar(nodo->derecho,visitar,extra);
+        else if(arbol->funcion_de_comparacion(clave,nodo->clave)>0){
+                return abb_borrar_auxiliar(arbol,nodo->derecho,clave,dato,nodo);
+        }                                                                     //cmp si devuelve 0 son iguales
+                                                                            // - si el primero menor
+                                                                            // + si el primero mayor
+        else{
+            return abb_asignar(arbol,nodo->izquierdo,clave,dato,nodo);
+        }
 }
 
+bool hijo_unico(nodo_t* nodo){
+    return (!nodo->nodo_derecho && !nodo->nodo_izquierdo)
+}
+           
+void verificar_borrar(abb_t *arbol,nodo_t* nodo,nodo_t* padre){
+    if (hijo_unico(nodo)){
+        continue;
+    }
+    else if(!nodo->nodo_izquierdo && hijo_unico(nodo->nodo_derecho)){
+        padre->nodo_derecho = nodo->nodo_derecho;
+    }
+    else if(!nodo->nodo_derecho && hijo_unico(nodo->nodo_izquierdo)){
+        padre->nodo_izquierdo = nodo->nodo_izquierdo;
+    }
+    else{
+        nodo_t* mgc = buscar_de_grande_el_mas_chico(nodo->nodo_derecho); //mgc "MAS GRANDE CHICO"
+        if(mgc->nodo_derecho){
+            nodo_t padre_mgc = buscar_padre_de_mgc(nodo->nodo_derecho, mgc->clave);
+            padre_mgc->nodo_izquierdo = mgc->nodo_derecho;
+        }
+        swap_mgc_nodo(nodo,padre,mgc);
+    }
+    free(nodo->clave);
+    free(nodo);
+    return;
+}
+
+void swap_mgc_nodo(nodo_t* nodo,nodo_t* padre, nodo_t* mgc){
+    if (arbol->funcion_de_comparacion(padre->clave,nodo->clave) >0){
+        padre->nodo_izquierdo = mgc;
+        mgc->nodo_izquierdo = nodo->nodo_izquierdo;
+        mgc->nodo_derecho = nodo->nodo_derecho;
+    }
+    else{
+        padre->nodo_derecho = mgc;
+        mgc->nodo_izquierdo = nodo->nodo_izquierdo;
+        mgc->nodo_derecho = nodo->nodo_derecho;
+    }
+}
+           
+nodo_t* buscar_padre_de_mgc(nodo_t* nodo, const char* clave){
+    if(arbol->funcion_de_comparacion(clave,nodo->nodo_izquierdo->clave) == 0){
+        return nodo;
+    }
+    return buscar_padre_de_mgc(nodo->nodo_izquierdo,clave);
+}
+           
+nodo_t* buscar_de_grande_el_mas_chico(nodo_t* nodo){
+    if(!nodo->nodo_izquierdo){
+        return nodo;
+    }
+    return buscar_de_grande_el_mas_chico(nodo_izquierdo);
+}
+           
+void abb_visitar(nodo_t* nodo,bool visitar(const char*, void*,void*), void *extra){
+    if(!nodo){
+            return;
+    }
+    abb_visitar(nodo->izquierdo,visitar,extra);
+    visitar(nodo->clave,nodo->dato,extra);
+    abb_visitar(nodo->derecho,visitar,extra);
+}
+
+
+           
+           
 //PRIMITIVAS DEL ITERADOR EXTERNO
 
 
