@@ -18,7 +18,7 @@ typedef struct nodo_abb nodo_t;
 
 
 struct abb{
-    nodo_abb* raiz;
+    nodo_t* raiz;
     abb_destruir_dato_t* destruir_dato;
     abb_comparar_clave_t* funcion_de_comparacion;
     size_t cantidad;
@@ -30,7 +30,7 @@ struct abb_iterador{
     pila_t* pila;
     abb_t* arbol;
 };
-typedef struct abb_iter abb_iter_t;
+
 
 
 
