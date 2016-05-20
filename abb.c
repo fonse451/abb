@@ -27,7 +27,7 @@ struct abb{
 };
 
 
-struct abb_iterador{
+struct abb_iter{
     pila_t* pila;
     const abb_t* arbol;
 };
@@ -143,6 +143,7 @@ abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
         arbol->raiz = NULL;
         arbol->destruir_dato = destruir_dato;
         arbol->funcion_de_comparacion = cmp;
+        arbol->cantidad = 0;
         return arbol;
 }
 
@@ -274,7 +275,10 @@ void abb_visitar(nodo_t* nodo,bool visitar(const char*, void*,void*), void *extr
     abb_visitar(nodo->nodo_derecho,visitar,extra);
 }
 
-
+void abb_destruir(abb_t* arbol){
+    abb_destruir_auxiliar(arbol, arbol->raiz);
+    free(arbol);
+}
            
            
 //PRIMITIVAS DEL ITERADOR EXTERNO

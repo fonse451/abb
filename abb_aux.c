@@ -1,7 +1,7 @@
 #define _POSIX_C_SOURCE 200809L  // getline()
 
 #include "abb.h"
-
+#include "abb.c"
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
