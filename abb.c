@@ -43,6 +43,17 @@ char *strdup (const char *s) {
     strcpy (d,s);                        // Copy the characters
     return d;                            // Return the new string
 }
+nodo_t* crear_nodo_t(void){
+    nodo_t* nodo = malloc(sizeof(nodo_t));
+    if(nodo == NULL){
+        return NULL;
+    }
+    nodo->clave = NULL;
+    nodo->dato = NULL;
+    nodo_izquierdo = NULL;
+    nodo_derecho = NULL;
+    return nodo;
+}
 
 bool abb_asignar(abb_t* arbol, nodo_t* nodo, const char* clave, void* dato){
     if (arbol->funcion_de_comparacion(clave,nodo->clave) == 0){
@@ -77,7 +88,76 @@ bool abb_asignar(abb_t* arbol, nodo_t* nodo, const char* clave, void* dato){
         }
     }
 }
-    
+
+bool hijo_unico(nodo_t* nodo){
+    return (!nodo->nodo_derecho && !nodo->nodo_izquierdo);
+}
+nodo_t* buscar_padre_de_mgc(abb_t* arbol,nodo_t* nodo, const char* clave){
+    if(arbol->funcion_de_comparacion(clave,nodo->nodo_izquierdo->clave) == 0){
+        return nodo;
+    }
+    return buscar_padre_de_mgc(arbol,nodo->nodo_izquierdo,clave);
+}
+
+nodo_t* buscar_de_grande_el_mas_chico(nodo_t* nodo){
+    if(!nodo->nodo_izquierdo){
+        return nodo;
+    }
+    return buscar_de_grande_el_mas_chico(nodo->nodo_izquierdo);
+}
+
+void swap_mgc_nodo(abb_t* arbol,nodo_t* nodo,nodo_t* padre, nodo_t* mgc){
+    if (arbol->funcion_de_comparacion(padre->clave,nodo->clave) >0){
+        padre->nodo_izquierdo = mgc;
+        mgc->nodo_izquierdo = nodo->nodo_izquierdo;
+        mgc->nodo_derecho = nodo->nodo_derecho;
+    }
+    else{
+        padre->nodo_derecho = mgc;
+        mgc->nodo_izquierdo = nodo->nodo_izquierdo;
+        mgc->nodo_derecho = nodo->nodo_derecho;
+    }
+}
+void verificar_borrar(abb_t *arbol,nodo_t* nodo,nodo_t* padre){
+    if (hijo_unico(nodo));
+    else if(!nodo->nodo_izquierdo && hijo_unico(nodo->nodo_derecho)){
+        padre->nodo_derecho = nodo->nodo_derecho;
+    }
+    else if(!nodo->nodo_derecho && hijo_unico(nodo->nodo_izquierdo)){
+        padre->nodo_izquierdo = nodo->nodo_izquierdo;
+    }
+    else{
+        nodo_t* mgc = buscar_de_grande_el_mas_chico(nodo->nodo_derecho); //mgc "MAS GRANDE CHICO"
+        if(mgc->nodo_derecho){
+            nodo_t* padre_mgc = buscar_padre_de_mgc(arbol,nodo->nodo_derecho, mgc->clave);
+            padre_mgc->nodo_izquierdo = mgc->nodo_derecho;
+        }
+        swap_mgc_nodo(arbol,nodo,padre,mgc);
+    }
+    free(nodo->clave);
+    free(nodo);
+    return;
+}
+
+
+
+
+void* abb_borrar_auxiliar(abb_t *arbol,nodo_t* nodo,const char* clave, nodo_t* padre){
+    if (arbol->funcion_de_comparacion(clave,nodo->clave) == 0){
+        void* dato = nodo->dato;
+        verificar_borrar(arbol,nodo,padre);
+        return dato;
+    }
+    else if(arbol->funcion_de_comparacion(clave,nodo->clave)>0){
+        return abb_borrar_auxiliar(arbol,nodo->nodo_derecho,clave,nodo);
+    }                                                                     //cmp si devuelve 0 son iguales
+    // - si el primero menor
+    // + si el primero mayor
+    else{
+        return abb_borrar_auxiliar(arbol,nodo->nodo_izquierdo,clave,nodo);
+    }
+}
+
 bool abb_auxiliar_pertenece(const abb_t* arbol,nodo_t* nodo,const char* clave){
     if (nodo == NULL){
         return false;
@@ -149,13 +229,13 @@ abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
 
 
 bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
-        if (arbol->raiz == NULL){
-                arbol->raiz->clave = strdup(clave);
-                arbol->raiz->dato = dato;
-                arbol->cantidad++;
-                return true;
-        }
-        return abb_asignar(arbol,arbol->raiz,clave,dato);
+    if (!arbol->raiz){
+            arbol->raiz->clave = strdup(clave);
+            arbol->raiz->dato = dato;
+            arbol->cantidad++;
+            return true;
+    }
+    return abb_asignar(arbol,arbol->raiz,clave,dato);
 }
 
 bool abb_pertenece(const abb_t *arbol, const char *clave){
@@ -176,7 +256,7 @@ void *abb_obtener(const abb_t *arbol, const char *clave){
 size_t abb_cantidad(abb_t *arbol){
     return arbol->cantidad;
 }
-void* abb_borrar_auxiliar(abb_t *arbol,nodo_t* nodo,const char* clave, nodo_t* padre);
+
 void *abb_borrar(abb_t *arbol, const char *clave){
     
     if(!arbol->raiz)return NULL;
@@ -193,79 +273,7 @@ void *abb_borrar(abb_t *arbol, const char *clave){
     arbol->cantidad--;
     return dato;
 }
-void verificar_borrar(abb_t *arbol,nodo_t* nodo,nodo_t* padre);           
-void swap_mgc_nodo(abb_t* arbol,nodo_t* nodo,nodo_t* padre, nodo_t* mgc);
-nodo_t* buscar_padre_de_mgc(abb_t* arbol,nodo_t* nodo, const char* clave);
-nodo_t* buscar_de_grande_el_mas_chico(nodo_t* nodo);
 
-void* abb_borrar_auxiliar(abb_t *arbol,nodo_t* nodo,const char* clave, nodo_t* padre){
-        if (arbol->funcion_de_comparacion(clave,nodo->clave) == 0){
-            void* dato = nodo->dato;
-            verificar_borrar(arbol,nodo,padre);
-            return dato;
-        }
-        else if(arbol->funcion_de_comparacion(clave,nodo->clave)>0){
-                return abb_borrar_auxiliar(arbol,nodo->nodo_derecho,clave,nodo);
-        }                                                                     //cmp si devuelve 0 son iguales
-                                                                            // - si el primero menor
-                                                                            // + si el primero mayor
-        else{
-            return abb_borrar_auxiliar(arbol,nodo->nodo_izquierdo,clave,nodo);
-        }
-}
-
-bool hijo_unico(nodo_t* nodo){
-    return (!nodo->nodo_derecho && !nodo->nodo_izquierdo);
-}
-           
-void verificar_borrar(abb_t *arbol,nodo_t* nodo,nodo_t* padre){
-    if (hijo_unico(nodo));
-    else if(!nodo->nodo_izquierdo && hijo_unico(nodo->nodo_derecho)){
-        padre->nodo_derecho = nodo->nodo_derecho;
-    }
-    else if(!nodo->nodo_derecho && hijo_unico(nodo->nodo_izquierdo)){
-        padre->nodo_izquierdo = nodo->nodo_izquierdo;
-    }
-    else{
-        nodo_t* mgc = buscar_de_grande_el_mas_chico(nodo->nodo_derecho); //mgc "MAS GRANDE CHICO"
-        if(mgc->nodo_derecho){
-            nodo_t* padre_mgc = buscar_padre_de_mgc(arbol,nodo->nodo_derecho, mgc->clave);
-            padre_mgc->nodo_izquierdo = mgc->nodo_derecho;
-        }
-        swap_mgc_nodo(arbol,nodo,padre,mgc);
-    }
-    free(nodo->clave);
-    free(nodo);
-    return;
-}
-
-void swap_mgc_nodo(abb_t* arbol,nodo_t* nodo,nodo_t* padre, nodo_t* mgc){
-    if (arbol->funcion_de_comparacion(padre->clave,nodo->clave) >0){
-        padre->nodo_izquierdo = mgc;
-        mgc->nodo_izquierdo = nodo->nodo_izquierdo;
-        mgc->nodo_derecho = nodo->nodo_derecho;
-    }
-    else{
-        padre->nodo_derecho = mgc;
-        mgc->nodo_izquierdo = nodo->nodo_izquierdo;
-        mgc->nodo_derecho = nodo->nodo_derecho;
-    }
-}
-           
-nodo_t* buscar_padre_de_mgc(abb_t* arbol,nodo_t* nodo, const char* clave){
-    if(arbol->funcion_de_comparacion(clave,nodo->nodo_izquierdo->clave) == 0){
-        return nodo;
-    }
-    return buscar_padre_de_mgc(arbol,nodo->nodo_izquierdo,clave);
-}
-           
-nodo_t* buscar_de_grande_el_mas_chico(nodo_t* nodo){
-    if(!nodo->nodo_izquierdo){
-        return nodo;
-    }
-    return buscar_de_grande_el_mas_chico(nodo->nodo_izquierdo);
-}
-           
 void abb_visitar(nodo_t* nodo,bool visitar(const char*, void*,void*), void *extra){
     if(!nodo){
             return;
