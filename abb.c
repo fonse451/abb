@@ -36,6 +36,15 @@ struct abb_iter{
 
 
 //FUNCIONES AUXILIARES
+void print_arbol(nodo_t* nodo){
+    if(!nodo)return;
+    print_arbol(nodo->nodo_izquierdo);
+    printf("%s\n",nodo->clave);
+    print_arbol(nodo->nodo_derecho);
+}
+void imprimir(abb_t* arbol){
+    print_arbol(arbol->raiz);
+}
 
 char *strdup (const char *s) {
     char *d = malloc (strlen (s) + 1);   // Space for length plus nul
@@ -43,15 +52,15 @@ char *strdup (const char *s) {
     strcpy (d,s);                        // Copy the characters
     return d;                            // Return the new string
 }
-nodo_t* crear_nodo_t(void){
+nodo_t* crear_nodo(void){
     nodo_t* nodo = malloc(sizeof(nodo_t));
     if(nodo == NULL){
         return NULL;
     }
     nodo->clave = NULL;
     nodo->dato = NULL;
-    nodo_izquierdo = NULL;
-    nodo_derecho = NULL;
+    nodo->nodo_izquierdo = NULL;
+    nodo->nodo_derecho = NULL;
     return nodo;
 }
 
@@ -59,10 +68,10 @@ bool abb_asignar(abb_t* arbol, nodo_t* nodo, const char* clave, void* dato){
     if (arbol->funcion_de_comparacion(clave,nodo->clave) == 0){
         return true;
     }
-	nodo_t* nodo_auxiliar=malloc(sizeof(nodo_t));
+	
     if(arbol->funcion_de_comparacion(clave,nodo->clave)>0){
         if(!nodo->nodo_derecho){                                      //cmp si devuelve 0 son iguales
-								                                     // - si el primero menor
+			nodo_t* nodo_auxiliar = crear_nodo();					                                     // - si el primero menor
             nodo_auxiliar->clave = strdup(clave);                       // + si el primero mayor
             if(!nodo_auxiliar->clave)return false;
             nodo_auxiliar->dato = dato;
@@ -76,11 +85,12 @@ bool abb_asignar(abb_t* arbol, nodo_t* nodo, const char* clave, void* dato){
     }
     else{
         if (!nodo->nodo_izquierdo){
-
+            nodo_t* nodo_auxiliar = crear_nodo();
             nodo_auxiliar->clave = strdup(clave);
             nodo_auxiliar->dato = dato;
             nodo->nodo_izquierdo = nodo_auxiliar;
             arbol->cantidad++;
+        
             return true;
         }
         else{
@@ -119,7 +129,18 @@ void swap_mgc_nodo(abb_t* arbol,nodo_t* nodo,nodo_t* padre, nodo_t* mgc){
     }
 }
 void verificar_borrar(abb_t *arbol,nodo_t* nodo,nodo_t* padre){
-    if (hijo_unico(nodo));
+    
+    if (hijo_unico(nodo)){
+        if(arbol->funcion_de_comparacion(nodo->clave,padre->clave) ==0){
+            arbol->raiz == NULL;
+        }
+        else if (arbol->funcion_de_comparacion(nodo->clave,padre->clave) > 0){
+            padre->nodo_derecho = NULL;
+        }
+        else{
+            padre->nodo_izquierdo = NULL;
+        }
+    }
     else if(!nodo->nodo_izquierdo && hijo_unico(nodo->nodo_derecho)){
         padre->nodo_derecho = nodo->nodo_derecho;
     }
@@ -128,7 +149,7 @@ void verificar_borrar(abb_t *arbol,nodo_t* nodo,nodo_t* padre){
     }
     else{
         nodo_t* mgc = buscar_de_grande_el_mas_chico(nodo->nodo_derecho); //mgc "MAS GRANDE CHICO"
-        if(mgc->nodo_derecho){
+        if(mgc->nodo_derecho && arbol->funcion_de_comparacion(arbol->raiz->clave,nodo->clave) != 0){
             nodo_t* padre_mgc = buscar_padre_de_mgc(arbol,nodo->nodo_derecho, mgc->clave);
             padre_mgc->nodo_izquierdo = mgc->nodo_derecho;
         }
@@ -148,11 +169,13 @@ void* abb_borrar_auxiliar(abb_t *arbol,nodo_t* nodo,const char* clave, nodo_t* p
         verificar_borrar(arbol,nodo,padre);
         return dato;
     }
+    padre = nodo;
     else if(arbol->funcion_de_comparacion(clave,nodo->clave)>0){
         return abb_borrar_auxiliar(arbol,nodo->nodo_derecho,clave,nodo);
     }                                                                     //cmp si devuelve 0 son iguales
     // - si el primero menor
     // + si el primero mayor
+    
     else{
         return abb_borrar_auxiliar(arbol,nodo->nodo_izquierdo,clave,nodo);
     }
@@ -174,36 +197,34 @@ bool abb_auxiliar_pertenece(const abb_t* arbol,nodo_t* nodo,const char* clave){
 }
     
 void* abb_obtener_auxiliar(const abb_t* arbol,nodo_t* nodo, const char* clave){
-    if(arbol->funcion_de_comparacion(nodo->clave,clave) == 0){
+    if(arbol->funcion_de_comparacion(clave,nodo->clave) == 0){
         return nodo->dato;
     }
-    else if(arbol->funcion_de_comparacion(nodo->clave,clave) > 0){
+    else if(arbol->funcion_de_comparacion(clave,nodo->clave) > 0){
         return abb_obtener_auxiliar(arbol,nodo->nodo_derecho,clave);
     }
-    else{
-        return abb_obtener_auxiliar(arbol,nodo->nodo_izquierdo,clave);
-    }
+    return abb_obtener_auxiliar(arbol,nodo->nodo_izquierdo,clave);
 }
-
-
-void abb_destruir_auxiliar(abb_t* arbol, nodo_t* nodo){
-    if (nodo == NULL){
-        return;
-    }
-    else{//Como no es una hoja, hay que seguir avanzando en ambos lados
-        abb_destruir_auxiliar(arbol,nodo->nodo_izquierdo);
-        abb_destruir_auxiliar(arbol,nodo->nodo_derecho);
-    }
-    //Aca ya es una hoja el nodo porque borramos sus hijos (POBRECITO U.U)
-    if (!arbol->destruir_dato){
+void borrar_nodo(abb_t* arbol,nodo_t* nodo){
+    free(nodo->clave);
+    if(arbol->destruir_dato){
         arbol->destruir_dato(nodo->dato);
     }
     free(nodo);
+}
+
+void abb_destruir_auxiliar(abb_t* arbol,nodo_t* nodo){
+    if (!nodo){
+        return;
+    }
+    abb_destruir_auxiliar(arbol,nodo->nodo_izquierdo);
+    abb_destruir_auxiliar(arbol,nodo->nodo_derecho);
+    borrar_nodo(arbol,nodo);
     return;
 }
 
 void auxiliar_creacion(abb_iter_t* iter,nodo_t* nodo){
-    if(nodo == NULL){
+    if(!nodo){
         return;
     }
     pila_apilar(iter->pila,nodo);
@@ -212,12 +233,12 @@ void auxiliar_creacion(abb_iter_t* iter,nodo_t* nodo){
 
 //PRIMITIVAS DEL ARBOL
 abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
-        if (cmp == NULL){
+        if (!cmp){
             return NULL;
         }
 
         abb_t* arbol = malloc(sizeof(abb_t));
-        if (arbol == NULL){
+        if (!arbol){
                 return NULL;
         }
         arbol->raiz = NULL;
@@ -230,6 +251,8 @@ abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato){
 
 bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
     if (!arbol->raiz){
+            nodo_t* raiz = crear_nodo();
+            arbol->raiz = raiz;
             arbol->raiz->clave = strdup(clave);
             arbol->raiz->dato = dato;
             arbol->cantidad++;
@@ -239,7 +262,7 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato){
 }
 
 bool abb_pertenece(const abb_t *arbol, const char *clave){
-        if (arbol->raiz == NULL){
+        if (!arbol->raiz){
                 return false;
         }
         return abb_auxiliar_pertenece(arbol,arbol->raiz,clave);
