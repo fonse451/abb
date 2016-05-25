@@ -48,5 +48,20 @@ void pruebas_abb_alumno() {
     imprimir(arbol_1);
     char* dato_1 = abb_obtener(arbol_1,val_7);
     print_test("el dato es el val_7", atoi(dato_1)==atoi(val_7));
-    abb_destruir(arbol_1);
+    
+    abb_borrar(arbol_1,val_1);
+    imprimir(arbol_1);
+    abb_borrar(arbol_1,val_2);
+    imprimir(arbol_1);
+    abb_borrar(arbol_1,val_3);
+    imprimir(arbol_1);
+    abb_borrar(arbol_1,val_4);
+    imprimir(arbol_1);
+    abb_borrar(arbol_1,val_5);
+    imprimir(arbol_1);
+    abb_borrar(arbol_1,val_6);
+    imprimir(arbol_1);
+    abb_borrar(arbol_1,val_7);
+    imprimir(arbol_1);
+    printf("cantidad es %zu\n",abb_cantidad(arbol_1));
 }
