@@ -100,7 +100,7 @@ bool abb_asignar(abb_t* arbol, nodo_t* nodo, const char* clave, void* dato){
 }
 
 bool hijo_unico(nodo_t* nodo){
-    return (!nodo->nodo_derecho && !nodo->nodo_izquierdo);
+    return !nodo->nodo_derecho && !nodo->nodo_izquierdo;
 }
 nodo_t* buscar_padre_de_mgc(abb_t* arbol,nodo_t* nodo, const char* clave){
 
@@ -194,10 +194,7 @@ void* abb_borrar_auxiliar(abb_t *arbol,nodo_t* nodo,const char* clave, nodo_t* p
     }
     else if(arbol->funcion_de_comparacion(clave,nodo->clave)>0){
         return abb_borrar_auxiliar(arbol,nodo->nodo_derecho,clave,nodo);
-    }                                                                     //cmp si devuelve 0 son iguales
-    // - si el primero menor
-    // + si el primero mayor
-    
+    }
     else{
         return abb_borrar_auxiliar(arbol,nodo->nodo_izquierdo,clave,nodo);
     }
@@ -329,7 +326,9 @@ void abb_visitar(nodo_t* nodo,bool visitar(const char*, void*,void*), void *extr
 }
 
 void abb_destruir(abb_t* arbol){
-    abb_destruir_auxiliar(arbol, arbol->raiz);
+    if(!arbol->raiz){
+        abb_destruir_auxiliar(arbol, arbol->raiz);
+    }
     free(arbol);
 }
            
