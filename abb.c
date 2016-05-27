@@ -33,8 +33,6 @@ struct abb_iter{
 };
 
 
-
-
 //FUNCIONES AUXILIARES
 void print_arbol(nodo_t* nodo){
     if(!nodo)return;
@@ -98,10 +96,12 @@ bool abb_asignar(abb_t* arbol, nodo_t* nodo, const char* clave, void* dato){
         }
     }
 }
-
-bool hijo_unico(nodo_t* nodo){
+//devuelve true si el nodo que le pasan por parametro es una hoja. De caso contrario false.
+bool es_hoja(nodo_t* nodo){
     return !nodo->nodo_derecho && !nodo->nodo_izquierdo;
 }
+
+//devuelve un nodo que ees el padre del mas chico de los mas grandes.
 nodo_t* buscar_padre_de_mgc(abb_t* arbol,nodo_t* nodo, const char* clave){
 
     if(arbol->funcion_de_comparacion(clave,nodo->nodo_izquierdo->clave) == 0){
@@ -110,13 +110,14 @@ nodo_t* buscar_padre_de_mgc(abb_t* arbol,nodo_t* nodo, const char* clave){
     return buscar_padre_de_mgc(arbol,nodo->nodo_izquierdo,clave);
 }
 
+// devuelve un nodo que es de los mas grande el mas chico.
 nodo_t* buscar_de_grande_el_mas_chico(nodo_t* nodo){
     if(!nodo->nodo_izquierdo){
         return nodo;
     }
     return buscar_de_grande_el_mas_chico(nodo->nodo_izquierdo);
 }
-
+//intercambia al mas chico de los mas grandes con el nodo.
 void swap_mgc_nodo(abb_t* arbol,nodo_t* nodo,nodo_t* padre, nodo_t* mgc){
     if (!padre){
         arbol->raiz = mgc;
@@ -136,9 +137,9 @@ void swap_mgc_nodo(abb_t* arbol,nodo_t* nodo,nodo_t* padre, nodo_t* mgc){
     }
 }
 
-void verificar_borrar(abb_t *arbol,nodo_t* nodo,nodo_t* padre){
+void borrar_nodo(abb_t *arbol,nodo_t* nodo,nodo_t* padre){
     
-    if (hijo_unico(nodo)){
+    if (es_hoja(nodo)){
         if(!padre){
             arbol->raiz = NULL;
         }
@@ -183,13 +184,10 @@ void verificar_borrar(abb_t *arbol,nodo_t* nodo,nodo_t* padre){
     return;
 }
 
-
-
-
 void* abb_borrar_auxiliar(abb_t *arbol,nodo_t* nodo,const char* clave, nodo_t* padre){
     if (arbol->funcion_de_comparacion(clave,nodo->clave) == 0){
         void* dato = nodo->dato;
-        verificar_borrar(arbol,nodo,padre);
+        borrar_nodo(arbol,nodo,padre);
         return dato;
     }
     else if(arbol->funcion_de_comparacion(clave,nodo->clave)>0){
@@ -331,11 +329,8 @@ void abb_destruir(abb_t* arbol){
     }
     free(arbol);
 }
-           
-           
+
 //PRIMITIVAS DEL ITERADOR EXTERNO
-
-
 
 abb_iter_t *abb_iter_in_crear(const abb_t *arbol){
         abb_iter_t* iter = malloc(sizeof(abb_iter_t));
@@ -353,7 +348,6 @@ abb_iter_t *abb_iter_in_crear(const abb_t *arbol){
         return iter;
 }
 
-
 const char *abb_iter_in_ver_actual(const abb_iter_t *iter){
         nodo_t* nodo = pila_ver_tope(iter->pila);
         if (!nodo)return NULL;
@@ -364,7 +358,6 @@ const char *abb_iter_in_ver_actual(const abb_iter_t *iter){
 bool abb_iter_in_al_final(const abb_iter_t *iter){
     return pila_esta_vacia(iter->pila);
 }
-
 
 bool abb_iter_in_avanzar(abb_iter_t *iter){
         if (abb_iter_in_al_final(iter)){
