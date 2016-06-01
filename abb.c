@@ -387,3 +387,11 @@ bool abb_iter_in_avanzar(abb_iter_t *iter){
         auxiliar_creacion(iter,nodo->nodo_derecho);
         return true;
 }
+
+void abb_iter_in_destruir(abb_iter_t* iter){
+    while(!pila_esta_vacia(iter->pila)){
+        pila_desapilar(iter->pila);
+    }
+    pila_destruir(iter->pila);
+    free(iter);
+}

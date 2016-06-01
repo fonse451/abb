@@ -43,23 +43,54 @@ void pruebas_abb_alumno() {
     char* val_5= "4";
     abb_guardar(arbol_1,val_4,val_4);
     abb_guardar(arbol_1,val_5,val_5);
-    imprimir(arbol_1);
+
     print_test("la cantidad es 5", abb_cantidad(arbol_1) == 5);
     abb_borrar(arbol_1,val_1);
     printf("cantidad es %zu\n",abb_cantidad(arbol_1));
-    imprimir(arbol_1);
+    
+
     abb_borrar(arbol_1,val_2);
     printf("cantidad es %zu\n",abb_cantidad(arbol_1));
-    imprimir(arbol_1);
+
     abb_borrar(arbol_1,val_3);
     printf("cantidad es %zu\n",abb_cantidad(arbol_1));
-    imprimir(arbol_1);
+    
     abb_borrar(arbol_1,val_5);
     printf("cantidad es %zu\n",abb_cantidad(arbol_1));
-    imprimir(arbol_1);
+    
     abb_borrar(arbol_1,val_4);
     printf("cantidad es %zu\n",abb_cantidad(arbol_1));
-    imprimir(arbol_1);
+    
     
     abb_destruir(arbol_1);
+    
+    //PRUEBAS REMPLAZAR
+    
+    
+    //PRUEBAS ITERADOR
+    abb_t* arbol_2 = abb_crear(cmp,NULL);
+    
+    char* valor_1= "1";
+    char* valor_2= "3";
+    char* valor_3= "2";
+    abb_guardar(arbol_2,valor_1,valor_1);
+    abb_guardar(arbol_2,valor_2,valor_2);
+    abb_guardar(arbol_2,valor_3,valor_3);
+    abb_iter_t* iter= abb_iter_in_crear(arbol_2);
+    
+    print_test("esta al final es falso",!abb_iter_in_al_final(iter));
+    print_test("el actual es 1",atoi(abb_iter_in_ver_actual(iter)) == 1);
+    abb_iter_in_avanzar(iter);
+    print_test("esta al final es falso",!abb_iter_in_al_final(iter));
+    print_test("el actual es 2",atoi(abb_iter_in_ver_actual(iter)) == 2);
+    abb_iter_in_avanzar(iter);
+    print_test("esta al final es falso",!abb_iter_in_al_final(iter));
+    print_test("el actual es 3",atoi(abb_iter_in_ver_actual(iter)) == 3);
+    abb_iter_in_avanzar(iter);
+    print_test("esta al final",abb_iter_in_al_final(iter));
+    
+    abb_destruir(arbol_2);
+    abb_iter_in_destruir(iter);
+    
+    
 }
