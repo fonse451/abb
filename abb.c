@@ -395,3 +395,15 @@ void abb_iter_in_destruir(abb_iter_t* iter){
     pila_destruir(iter->pila);
     free(iter);
 }
+
+//ITERADOR INTERNO
+void abb_in_order_aux(nodo_t* nodo,bool visitar(const char *, void *, void *), void *extra ){
+    if(!nodo)return ;
+    abb_in_order_aux(nodo->nodo_izquierdo,visitar,extra);
+    visitar(nodo->clave,nodo->dato,extra);
+    abb_in_order_aux(nodo->nodo_derecho,visitar,extra);
+}
+void abb_in_order(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra){
+    if(!arbol)return;
+    abb_in_order_aux(arbol->raiz,visitar,extra);
+}
