@@ -124,18 +124,21 @@ void swap_mgc_nodo(abb_t* arbol,nodo_t* nodo,nodo_t* padre, nodo_t* mgc){
         if(nodo->nodo_izquierdo){
             mgc->nodo_izquierdo = nodo->nodo_izquierdo;
         }
+        if (arbol->funcion_de_comparacion(mgc->clave,nodo->nodo_derecho->clave ) != 0){
+            mgc->nodo_derecho = nodo->nodo_derecho;
+        }
     }
     else if (arbol->funcion_de_comparacion(padre->clave,nodo->clave) >0){
         padre->nodo_izquierdo = mgc;
         mgc->nodo_izquierdo = nodo->nodo_izquierdo;
-        if (arbol->funcion_de_comparacion(mgc->nodo_derecho->clave,nodo->nodo_derecho->clave ) != 0){
+        if (arbol->funcion_de_comparacion(mgc->clave,nodo->nodo_derecho->clave ) != 0){
             mgc->nodo_derecho = nodo->nodo_derecho;
         }
     }
     else{
         padre->nodo_derecho = mgc;
         mgc->nodo_izquierdo = nodo->nodo_izquierdo;
-        if (arbol->funcion_de_comparacion(mgc->nodo_derecho->clave,nodo->nodo_derecho->clave ) != 0){
+        if (arbol->funcion_de_comparacion(mgc->clave,nodo->nodo_derecho->clave ) != 0){
             mgc->nodo_derecho = nodo->nodo_derecho;
         }
     }
