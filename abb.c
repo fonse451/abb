@@ -98,7 +98,7 @@ bool abb_asignar(abb_t* arbol, nodo_t* nodo, const char* clave, void* dato){
 }
 //devuelve true si el nodo que le pasan por parametro es una hoja. De caso contrario false.
 bool es_hoja(nodo_t* nodo){
-    return !nodo->nodo_derecho && !nodo->nodo_izquierdo;
+    return (!nodo->nodo_derecho && !nodo->nodo_izquierdo);
 }
 
 //devuelve un nodo que ees el padre del mas chico de los mas grandes.
@@ -128,16 +128,29 @@ void swap_mgc_nodo(abb_t* arbol,nodo_t* nodo,nodo_t* padre, nodo_t* mgc){
     else if (arbol->funcion_de_comparacion(padre->clave,nodo->clave) >0){
         padre->nodo_izquierdo = mgc;
         mgc->nodo_izquierdo = nodo->nodo_izquierdo;
-        mgc->nodo_derecho = nodo->nodo_derecho;
+        if (arbol->funcion_de_comparacion(mgc->nodo_derecho->clave,nodo->nodo_derecho->clave ) != 0){
+            mgc->nodo_derecho = nodo->nodo_derecho;
+        }
     }
     else{
         padre->nodo_derecho = mgc;
         mgc->nodo_izquierdo = nodo->nodo_izquierdo;
-        mgc->nodo_derecho = nodo->nodo_derecho;
+        if (arbol->funcion_de_comparacion(mgc->nodo_derecho->clave,nodo->nodo_derecho->clave ) != 0){
+            mgc->nodo_derecho = nodo->nodo_derecho;
+        }
     }
 }
 
-void borrar_nodo(abb_t *arbol,nodo_t* nodo,nodo_t* padre){
+void swap(abb_t* arbol,nodo_t* nodo,nodo_t* padre, nodo_t* nodo_hijo){
+    if (arbol->funcion_de_comparacion(padre->clave,nodo->clave) >0){
+        padre->nodo_izquierdo = nodo_hijo;
+    }
+    else{
+        padre->nodo_derecho = nodo_hijo;
+    }
+}
+
+void borrar_nodo_aux(abb_t *arbol,nodo_t* nodo,nodo_t* padre){
     
     if (es_hoja(nodo)){
         if(!padre){
@@ -151,11 +164,12 @@ void borrar_nodo(abb_t *arbol,nodo_t* nodo,nodo_t* padre){
         }
     }
     else if(!nodo->nodo_izquierdo){
+        
         if (!padre){
             arbol->raiz = nodo->nodo_derecho;
         }
         else{
-            padre->nodo_derecho = nodo->nodo_derecho;
+            swap(arbol,nodo,padre,nodo->nodo_derecho);
         }
     }
     else if(!nodo->nodo_derecho){
@@ -163,12 +177,13 @@ void borrar_nodo(abb_t *arbol,nodo_t* nodo,nodo_t* padre){
             arbol->raiz = nodo->nodo_izquierdo;
         }
         else{
-            padre->nodo_izquierdo = nodo->nodo_izquierdo;
+            swap(arbol,nodo,padre,nodo->nodo_izquierdo);
         }
     }
     else{
         nodo_t* mgc = buscar_de_grande_el_mas_chico(nodo->nodo_derecho); //mgc "MAS GRANDE CHICO"
-        if(nodo->nodo_derecho != mgc){
+        
+        if(arbol->funcion_de_comparacion(nodo->nodo_derecho->clave,mgc->clave) != 0){
             nodo_t* padre_mgc = buscar_padre_de_mgc(arbol,nodo->nodo_derecho, mgc->clave);
             if(mgc->nodo_derecho){
                 padre_mgc->nodo_izquierdo = mgc->nodo_derecho;
@@ -187,10 +202,10 @@ void borrar_nodo(abb_t *arbol,nodo_t* nodo,nodo_t* padre){
 void* abb_borrar_auxiliar(abb_t *arbol,nodo_t* nodo,const char* clave, nodo_t* padre){
     if (arbol->funcion_de_comparacion(clave,nodo->clave) == 0){
         void* dato = nodo->dato;
-        borrar_nodo(arbol,nodo,padre);
+        borrar_nodo_aux(arbol,nodo,padre);
         return dato;
     }
-    else if(arbol->funcion_de_comparacion(clave,nodo->clave)>0){
+    else if(arbol->funcion_de_comparacion(clave,nodo->clave) > 0){
         return abb_borrar_auxiliar(arbol,nodo->nodo_derecho,clave,nodo);
     }
     else{
@@ -306,6 +321,7 @@ void *abb_borrar(abb_t *arbol, const char *clave){
         dato = arbol->raiz->dato;
         free(arbol->raiz->clave);
         free(arbol->raiz);
+        arbol->raiz = NULL; //lo agrege
     }
     else{
         dato = abb_borrar_auxiliar(arbol,arbol->raiz,clave, NULL);
@@ -324,7 +340,7 @@ void abb_visitar(nodo_t* nodo,bool visitar(const char*, void*,void*), void *extr
 }
 
 void abb_destruir(abb_t* arbol){
-    if(!arbol->raiz){
+    if(arbol->raiz){ //le borre !
         abb_destruir_auxiliar(arbol, arbol->raiz);
     }
     free(arbol);

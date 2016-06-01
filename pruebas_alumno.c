@@ -21,6 +21,8 @@ void pruebas_abb_alumno() {
     abb_t* arbol_vacio = abb_crear(cmp,NULL);
     print_test("se creo el arbol vacio", abb_cantidad(arbol_vacio) == 0);
     abb_destruir(arbol_vacio);
+    
+    //INSERTAR ELEMENTOS ESTATICOS EN EL ARBOL Y BORRARLOS 
     abb_t* arbol_1= abb_crear(cmp,NULL);
     char* val_1= "1";
     char* val_2= "2";
@@ -37,22 +39,27 @@ void pruebas_abb_alumno() {
     
     char* dato = abb_obtener(arbol_1,val_2);
     print_test("el dato es el val_2", atoi(dato)==atoi(val_2));
-    char* val_4= "3";
-    char* val_5= "5";
+    char* val_4= "5";
+    char* val_5= "3";
     abb_guardar(arbol_1,val_4,val_4);
     abb_guardar(arbol_1,val_5,val_5);
     imprimir(arbol_1);
     print_test("la cantidad es 5", abb_cantidad(arbol_1) == 5);
-    abb_borrar(arbol_1,val_5);
-    imprimir(arbol_1);
-    abb_borrar(arbol_1,val_4);
+    abb_borrar(arbol_1,val_1);
+    printf("cantidad es %zu\n",abb_cantidad(arbol_1));
     imprimir(arbol_1);
     abb_borrar(arbol_1,val_3);
+    printf("cantidad es %zu\n",abb_cantidad(arbol_1));
+    imprimir(arbol_1);
+    abb_borrar(arbol_1,val_5);
+    printf("cantidad es %zu\n",abb_cantidad(arbol_1));
     imprimir(arbol_1);
     abb_borrar(arbol_1,val_2);
-    imprimir(arbol_1);
-    abb_borrar(arbol_1,val_1);
-    imprimir(arbol_1);
     printf("cantidad es %zu\n",abb_cantidad(arbol_1));
+    imprimir(arbol_1);
+    abb_borrar(arbol_1,val_4);
+    printf("cantidad es %zu\n",abb_cantidad(arbol_1));
+    imprimir(arbol_1);
+    
     abb_destruir(arbol_1);
 }
