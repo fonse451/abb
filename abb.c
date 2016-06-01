@@ -64,6 +64,7 @@ nodo_t* crear_nodo(void){
 
 bool abb_asignar(abb_t* arbol, nodo_t* nodo, const char* clave, void* dato){
     if (arbol->funcion_de_comparacion(clave,nodo->clave) == 0){
+        nodo->dato = dato;
         return true;
     }
 	
